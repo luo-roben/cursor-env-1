@@ -1,0 +1,45 @@
+---
+description: Java 编码规范完整版
+globs: "**/*.java"
+alwaysApply: false
+---
+
+# Java 编码规范（cheetah-poc）
+
+## 1、项目机制优先
+
+- 项目已有 `GlobalExceptionHandler` 统一处理异常，Controller **不要**在方法内写 try-catch
+- 异步执行使用 `ContextPropagatingExecutor` 或已配置 TTL 的线程池，确保 MDC + TTL 完整传播
+- JSON 使用 `JsonUtils`，对象转换推荐 MapStruct，简单场景可用 `BeanUtils.toBean`
+
+## 2、Controller 层
+
+正确示范：直接调用 Service，返回 `success(...)`，使用 `CommonResult`、`PageResult`。
+
+## 3、Service 层异常处理
+
+业务异常用 `ServiceException`；受检异常 try-catch 后转换抛出；非受检异常直接向上抛出；try-catch 只包住会抛异常的代码；受检异常多的封装到专有 Service；finally 资源关闭封装为私有方法。
+
+## 4、分层架构
+
+Controller（参数、调用、返回）→ Manager（编排、事务）→ Service（单一领域）→ Mapper（数据访问）
+
+## 5、方法规范
+
+参数 ≤ 4 个，过长用 DTO 包装；单方法 ≤ 80 行；嵌套 ≤ 3 层，用提前 return、卫语句；方法名 ≤ 20 字符。
+
+## 6、实体与命名
+
+*DO（数据库）、*ReqVO/*PageReqVO（请求）、*RespVO（响应）、PageResult<T>（分页）
+
+## 7、工具类与单例
+
+StringUtils.isNotBlank、CollectionUtils.isNotEmpty；DateTimeFormatter 用 static final；S3/HTTP 客户端 @PostConstruct/@PreDestroy 或注入 @Bean
+
+## 8、对象转换
+
+推荐 MapStruct，简单同结构用 BeanUtils.toBean，禁止逐字段 setter
+
+## 9、线程安全与复用原则
+
+避免实例变量共享；异步用 ContextPropagatingExecutor。复用前评估是否适合抽象、变更频率、扩展点。

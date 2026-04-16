@@ -1,0 +1,41 @@
+---
+description: cheetah-poc 项目 Java 编码约束
+globs: "**/*.java"
+alwaysApply: false
+---
+
+# cheetah-poc Java 项目约束
+
+遵循项目既有机制，不引入与现有架构冲突的实现。
+
+## 异常处理
+
+- **Controller 层**：项目使用 `GlobalExceptionHandler`（@RestControllerAdvice）统一处理异常，Controller 保持简洁，**不要**在方法内写 try-catch，直接 `return success(service.xxx())`。
+- **Service 层**：业务异常使用 `ServiceException`（对应规范中的 BizException），系统异常由 GlobalExceptionHandler 兜底。
+
+## 异步与多线程
+
+- 涉及异步执行（CompletableFuture、线程池、@Async 等）时，**必须**使用项目提供的 `ContextPropagatingExecutor` 或已配置 `TtlRunnable` 的线程池，确保 MDC（traceId）和 TTL（租户、安全上下文）同时传播并在执行后清理。
+- **禁止**自建只传播 MDC 的 Executor 装饰器，会导致 TTL 污染（跨租户数据问题）。
+
+## JSON 序列化
+
+- 统一使用 `com.br.cheetah.framework.common.util.json.JsonUtils`（基于 Jackson）。
+- 禁止在业务代码中直接使用 `new Gson()`、`JSON.toJSONString()`、`JSONUtil.toJsonStr()` 等。
+
+## 对象转换
+
+- DO、DTO、VO 转换：**推荐** MapStruct，字段完全一致且无复杂映射的简单场景可使用 `BeanUtils.toBean`。
+- 禁止逐字段手写 setter 转换。
+
+## 分层架构
+
+- Controller → Manager → Service → Mapper
+- Controller：参数接收、权限校验、调用 Manager/Service、返回 CommonResult
+- Manager：编排多个 Service，事务边界、跨模块组合
+- Service：单一领域能力，可依赖 Mapper
+- Mapper：仅数据访问
+
+## 命名与术语
+
+- 与项目一致：`ServiceException`、`CommonResult`、`PageResult`、`DO`（数据库实体）、`Req`（请求参数）、`RespVO`（响应）

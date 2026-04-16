@@ -1,0 +1,25 @@
+---
+description: 代码变更的完整性原则 - 修改或生成代码时不引入新问题
+globs: "**/*.java"
+alwaysApply: false
+---
+
+# 代码变更的完整性原则（不引入新问题）
+
+修改或生成代码时，必须考虑对项目既有机制和隐性依赖的影响。优先使用项目提供的机制，避免为解决一个问题而引入新问题。
+
+## 核心要求
+
+1. **先理解再修改**：改动前先了解项目已有的机制（如 GlobalExceptionHandler、ContextPropagatingExecutor、租户上下文、链路追踪等），不要凭空设计，不要绕过既有机制。
+
+2. **考虑隐性依赖**：修改涉及异步、多线程、MQ、新线程池等场景时，要检查 ThreadLocal、MDC、租户上下文、安全上下文等是否会丢失、污染或错误传递。例如：为解决 TraceId 缺失而自定义 Executor 时，若只传播 MDC 而忽略 TTL，会导致租户上下文污染。
+
+3. **优先复用项目设施**：优先使用项目提供的工具和模式（如 JsonUtils、BeanUtils、全局异常处理、ContextPropagatingExecutor），避免自建与现有机制不一致的实现。
+
+4. **修复即约束范围**：修复问题时，明确该 fix 的影响范围，确保为解决 A 问题而采取的方案不会破坏 B（如多租户隔离、链路追踪、安全上下文等）。
+
+## 反面案例
+
+- 为解决异步线程 TraceId 缺失，自写只传播 MDC 的 Executor，导致 TTL（租户、安全上下文）污染
+- 在 Controller 增加 try-catch，与已有 GlobalExceptionHandler 重复
+- 为复用而过度抽象，忽视扩展性和变更频率
