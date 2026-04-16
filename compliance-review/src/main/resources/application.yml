@@ -1,0 +1,69 @@
+server:
+  port: 8080
+
+spring:
+  datasource:
+    url: jdbc:mysql://localhost:3306/compliance_review?useUnicode=true&characterEncoding=UTF-8&serverTimezone=Asia/Shanghai&allowPublicKeyRetrieval=true&useSSL=false
+    username: compliance
+    password: compliance123
+    driver-class-name: com.mysql.cj.jdbc.Driver
+  jpa:
+    hibernate:
+      ddl-auto: none
+    show-sql: false
+    properties:
+      hibernate:
+        dialect: org.hibernate.dialect.MySQLDialect
+  jackson:
+    default-property-inclusion: non_null
+    serialization:
+      write-dates-as-timestamps: false
+    date-format: yyyy-MM-dd HH:mm:ss
+    time-zone: Asia/Shanghai
+  sql:
+    init:
+      mode: always
+      schema-locations: classpath:db/schema.sql
+
+springdoc:
+  api-docs:
+    path: /v3/api-docs
+  swagger-ui:
+    path: /swagger-ui.html
+
+compliance:
+  llm:
+    default-model: mock
+    temperature: 0.0
+    max-retries: 3
+  prompt:
+    review-template: |
+      你是一个专业的金融合规审查专家。请根据以下法规要求和上下文信息，对给定的营销内容进行合规审查。
+
+      ## 适用法规
+      {lawArticles}
+
+      ## 企业自定义规则
+      {customRules}
+
+      ## 待审查内容
+      类型: {contentType}
+      产品类型: {productType}
+
+      {content}
+
+      ## 输出要求
+      请以JSON格式输出审查结果，包含以下字段:
+      - segments: 数组，每个元素包含:
+        - segmentIndex: 段落序号
+        - originalText: 段落原文
+        - verdict: violation/compliant/needs_review
+        - confidence: 置信度(0-1)
+        - issueType: 问题类型
+        - severity: critical/major/minor/info
+        - description: 问题描述
+        - citedArticleCode: 引用法条编号
+        - citedLawName: 引用法律名称
+        - suggestion: 修改建议
+      - missingElements: 数组，缺失的必要元素
+      - overallVerdict: violation/compliant/needs_review
