@@ -142,6 +142,7 @@
 | [05-feedback-loop.md](05-feedback-loop.md) | 审核反馈与案例沉淀（"越用越准"） |
 | [06-custom-rules.md](06-custom-rules.md) | 企业自定义规则 |
 | [07-infrastructure.md](07-infrastructure.md) | 多租户、数据模型、非功能性需求、技术选型、部署架构、MVP 阶段划分 |
+| [08-design-decisions.md](08-design-decisions.md) | **设计决策与争议回应**——外部评审(Gemini)的建议采纳/不采纳分析、五项增强方案 |
 
 ---
 
