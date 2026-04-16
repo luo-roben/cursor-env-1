@@ -137,6 +137,7 @@
 | [01-knowledge-layer.md](01-knowledge-layer.md) | 知识构建层详细设计 |
 | [02-case-management.md](02-case-management.md) | 历史案例导入与结构化 |
 | [03-review-engine.md](03-review-engine.md) | 审查执行层（ACE 上下文动态组装） |
+| [03a-review-deep-dive.md](03a-review-deep-dive.md) | **审查执行细节深入解析**——拿什么审、怎么分段、怎么检索、元数据是什么、分类体系、law_knowledge 表详解 |
 | [04-content-routing.md](04-content-routing.md) | 内容路由与差异化处理、审查结果后处理与防幻觉 |
 | [05-feedback-loop.md](05-feedback-loop.md) | 审核反馈与案例沉淀（"越用越准"） |
 | [06-custom-rules.md](06-custom-rules.md) | 企业自定义规则 |
