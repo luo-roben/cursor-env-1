@@ -8,10 +8,15 @@ const request = axios.create({
 
 request.interceptors.response.use(
   (response) => {
-    return response.data;
+    const res = response.data;
+    if (res.code !== 0) {
+      message.error(res.msg || '请求失败');
+      return Promise.reject(new Error(res.msg));
+    }
+    return res;
   },
   (error) => {
-    const msg = error.response?.data?.message || '请求失败，请稍后重试';
+    const msg = error.response?.data?.msg || error.response?.data?.message || '请求失败，请稍后重试';
     message.error(msg);
     return Promise.reject(error);
   }

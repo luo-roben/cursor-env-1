@@ -1,11 +1,11 @@
 export interface ApiResponse<T> {
   code: number;
-  message: string;
+  msg: string;
   data: T;
 }
 
 export interface PageResult<T> {
-  records: T[];
+  list: T[];
   total: number;
   pageNum: number;
   pageSize: number;
@@ -20,81 +20,109 @@ export interface ReviewSubmitRequest {
   originalContent: string;
 }
 
-export interface ReviewItem {
+export interface ReviewResult {
   id: number;
-  contentType: string;
-  productType: string;
+  segmentIndex: number;
+  originalText: string;
   verdict: string;
-  riskScore: number;
-  riskLevel: string;
-  status: string;
-  createdAt: string;
-  updatedAt: string;
-}
-
-export interface Violation {
-  segmentText: string;
-  issueDescription: string;
-  lawCitation: string;
-  verifiedStatus: string;
-  verifiedLawText: string;
+  confidence: number;
+  issueType: string;
+  severity: string;
+  description: string;
+  lawArticleId: number | null;
+  citedArticleCode: string;
+  citedLawName: string;
+  citationStatus: string;
+  verifiedOriginalText: string | null;
   suggestion: string;
 }
 
 export interface MissingElement {
-  elementName: string;
-  description: string;
+  id: number;
+  element: string;
   requirement: string;
+  lawArticleId: number | null;
+  severity: string;
+  suggestion: string;
 }
 
-export interface ReviewDetail {
+export interface ReviewTaskResp {
   id: number;
   tenantId: number;
+  submittedBy: number;
   contentType: string;
   productType: string;
   channel: string;
   originalContent: string;
-  verdict: string;
+  fileUrl: string | null;
+  overallVerdict: string;
   riskScore: number;
   riskLevel: string;
-  status: string;
-  violations: Violation[];
-  missingElements: MissingElement[];
+  reviewStatus: string;
+  llmModel: string;
+  llmLatencyMs: number;
+  totalLatencyMs: number;
   createdAt: string;
-  updatedAt: string;
+  completedAt: string;
+  results: ReviewResult[];
+  missingElements: MissingElement[];
+}
+
+export interface ReviewItem {
+  id: number;
+  contentType: string;
+  productType: string;
+  overallVerdict: string;
+  riskScore: number;
+  riskLevel: string;
+  reviewStatus: string;
+  createdAt: string;
+  completedAt: string;
 }
 
 export interface LawArticle {
   id: number;
+  sourceId: number;
   lawName: string;
-  articleNumber: string;
+  lawShortName: string;
+  articleId: string;
+  originalText: string;
   normType: string;
-  effectLevel: string;
-  content: string;
+  authorityLevel: number;
   status: string;
-  createdAt: string;
+  applicableContentTypes: string;
+  applicableProductTypes: string;
 }
 
 export interface LawArticleCreateRequest {
+  sourceId: number;
   lawName: string;
-  articleNumber: string;
+  lawShortName?: string;
+  articleId: string;
+  originalText: string;
   normType: string;
-  effectLevel: string;
-  content: string;
+  authorityLevel: number;
+  applicableContentTypes?: string[];
+  applicableProductTypes?: string[];
+  keyPhrases?: string[];
+  violationExamples?: string[];
 }
 
 export interface RuleItem {
   id: number;
-  name: string;
-  description: string;
-  category: string;
-  status: string;
+  tenantId: number;
+  ruleType: string;
+  content: string;
+  priority: number;
+  enabled: boolean;
   createdAt: string;
 }
 
 export interface RuleCreateRequest {
-  name: string;
-  description: string;
-  category: string;
-  conditions: string;
+  tenantId: number;
+  ruleType: string;
+  content: string;
+  priority?: number;
+  matchMode?: string;
+  severityIfTriggered?: string;
 }

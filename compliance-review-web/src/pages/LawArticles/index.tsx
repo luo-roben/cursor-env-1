@@ -35,7 +35,7 @@ export default function LawArticles() {
     setLoading(true);
     try {
       const res = await getLawArticleList({ pageNum: pn, pageSize: ps });
-      setData(res.data.records);
+      setData(res.data.list || []);
       setTotal(res.data.total);
     } catch {
       message.error('获取法条列表失败');

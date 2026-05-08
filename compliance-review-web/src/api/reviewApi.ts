@@ -1,12 +1,12 @@
 import request from './request';
-import type { ApiResponse, PageResult, ReviewItem, ReviewDetail, ReviewSubmitRequest } from '../types';
+import type { ApiResponse, PageResult, ReviewItem, ReviewTaskResp, ReviewSubmitRequest } from '../types';
 
-export function submitReview(data: ReviewSubmitRequest): Promise<ApiResponse<ReviewDetail>> {
+export function submitReview(data: ReviewSubmitRequest): Promise<ApiResponse<ReviewTaskResp>> {
   return request.post('/review/submit', data);
 }
 
-export function getReviewById(id: number): Promise<ApiResponse<ReviewDetail>> {
-  return request.get(`/review/${id}`);
+export function getReviewById(id: number, tenantId: number = 1): Promise<ApiResponse<ReviewTaskResp>> {
+  return request.get(`/review/${id}`, { params: { tenantId } });
 }
 
 export function getReviewList(params: {

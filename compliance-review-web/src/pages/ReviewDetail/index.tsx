@@ -1,38 +1,19 @@
 import { useCallback, useEffect, useState } from 'react';
 import { useParams } from 'react-router-dom';
-import { Card, Descriptions, Tag, Alert, Badge, Spin, Typography, message } from 'antd';
+import { Card, Descriptions, Tag, Alert, Spin, Typography, message } from 'antd';
 import { getReviewById } from '../../api/reviewApi';
-import type { ReviewDetail as ReviewDetailType } from '../../types';
+import type { ReviewTaskResp } from '../../types';
 
 const { Paragraph, Text } = Typography;
 
-const riskLevelColor: Record<string, string> = {
-  high: 'red',
-  medium: 'orange',
-  low: 'green',
-};
-
-const verdictColor: Record<string, string> = {
-  violation: 'red',
-  compliant: 'green',
-  needs_review: 'orange',
-};
-
-const verdictLabel: Record<string, string> = {
-  violation: '违规',
-  compliant: '合规',
-  needs_review: '待复核',
-};
-
-const verifiedStatusIcon: Record<string, string> = {
-  verified: '✅',
-  uncertain: '⚠️',
-  unverified: '❌',
-};
+const riskLevelColor: Record<string, string> = { high: 'red', medium: 'orange', low: 'green' };
+const verdictColor: Record<string, string> = { violation: 'red', compliant: 'green', needs_review: 'orange' };
+const verdictLabel: Record<string, string> = { violation: '违规', compliant: '合规', needs_review: '待复核' };
+const citationIcon: Record<string, string> = { verified: '✅', corrected: '⚠️', unverified: '❌', pending: '❓' };
 
 export default function ReviewDetail() {
   const { id } = useParams<{ id: string }>();
-  const [detail, setDetail] = useState<ReviewDetailType | null>(null);
+  const [detail, setDetail] = useState<ReviewTaskResp | null>(null);
   const [loading, setLoading] = useState(false);
 
   const fetchDetail = useCallback(async (reviewId: number) => {
@@ -60,15 +41,17 @@ export default function ReviewDetail() {
       <Card title="审查摘要" style={{ marginBottom: 16 }}>
         <Descriptions column={4}>
           <Descriptions.Item label="审查结论">
-            <Tag color={verdictColor[detail.verdict]}>{verdictLabel[detail.verdict] || detail.verdict}</Tag>
+            <Tag color={verdictColor[detail.overallVerdict]}>{verdictLabel[detail.overallVerdict] || detail.overallVerdict}</Tag>
           </Descriptions.Item>
           <Descriptions.Item label="风险评分">{detail.riskScore ?? '-'}</Descriptions.Item>
           <Descriptions.Item label="风险等级">
             <Tag color={riskLevelColor[detail.riskLevel]}>{detail.riskLevel}</Tag>
           </Descriptions.Item>
-          <Descriptions.Item label="状态">{detail.status}</Descriptions.Item>
+          <Descriptions.Item label="状态">{detail.reviewStatus}</Descriptions.Item>
+          <Descriptions.Item label="模型">{detail.llmModel}</Descriptions.Item>
+          <Descriptions.Item label="耗时">{detail.totalLatencyMs}ms</Descriptions.Item>
           <Descriptions.Item label="创建时间">{detail.createdAt}</Descriptions.Item>
-          <Descriptions.Item label="更新时间">{detail.updatedAt}</Descriptions.Item>
+          <Descriptions.Item label="完成时间">{detail.completedAt}</Descriptions.Item>
         </Descriptions>
       </Card>
 
@@ -79,44 +62,42 @@ export default function ReviewDetail() {
       </Card>
 
       <Card title="审查结果">
-        {detail.violations && detail.violations.length > 0 && (
+        {detail.results && detail.results.length > 0 && (
           <>
             <Text strong style={{ fontSize: 16, display: 'block', marginBottom: 12 }}>
-              违规项 ({detail.violations.length})
+              违规项 ({detail.results.filter(r => r.verdict === 'violation').length})
             </Text>
-            {detail.violations.map((v, idx) => (
+            {detail.results.filter(r => r.verdict === 'violation').map((r) => (
               <Alert
-                key={idx}
+                key={r.id}
                 type="error"
                 showIcon
                 style={{ marginBottom: 12 }}
                 message={
                   <div>
-                    <Text strong>问题描述：</Text>{v.issueDescription}
+                    <Text strong>问题：</Text>{r.description}
+                    <Tag color="red" style={{ marginLeft: 8 }}>{r.severity}</Tag>
                   </div>
                 }
                 description={
                   <div>
                     <Paragraph>
                       <Text strong>违规片段：</Text>
-                      <Text mark>{v.segmentText}</Text>
+                      <Text mark>{r.originalText}</Text>
                     </Paragraph>
                     <Paragraph>
                       <Text strong>法条引用：</Text>
-                      {v.lawCitation}
-                      <Badge
-                        count={verifiedStatusIcon[v.verifiedStatus] || '❓'}
-                        style={{ marginLeft: 8 }}
-                      />
+                      {r.citedLawName} {r.citedArticleCode}
+                      <span style={{ marginLeft: 8 }}>{citationIcon[r.citationStatus] || '❓'}</span>
                     </Paragraph>
-                    {v.verifiedLawText && (
+                    {r.verifiedOriginalText && (
                       <Paragraph>
-                        <Text strong>法条原文：</Text>
-                        <Text type="secondary">{v.verifiedLawText}</Text>
+                        <Text strong>法条原文（知识库回填）：</Text>
+                        <Text type="secondary">{r.verifiedOriginalText}</Text>
                       </Paragraph>
                     )}
                     <Paragraph>
-                      <Text strong>修改建议：</Text>{v.suggestion}
+                      <Text strong>修改建议：</Text>{r.suggestion}
                     </Paragraph>
                   </div>
                 }
@@ -130,17 +111,18 @@ export default function ReviewDetail() {
             <Text strong style={{ fontSize: 16, display: 'block', marginBottom: 12, marginTop: 16 }}>
               缺失要素 ({detail.missingElements.length})
             </Text>
-            {detail.missingElements.map((m, idx) => (
+            {detail.missingElements.map((m) => (
               <Alert
-                key={idx}
+                key={m.id}
                 type="warning"
                 showIcon
                 style={{ marginBottom: 12 }}
-                message={m.elementName}
+                message={m.element}
                 description={
                   <div>
-                    <Paragraph><Text strong>说明：</Text>{m.description}</Paragraph>
                     <Paragraph><Text strong>要求：</Text>{m.requirement}</Paragraph>
+                    <Paragraph><Text strong>建议：</Text>{m.suggestion}</Paragraph>
+                    <Tag color="orange">{m.severity}</Tag>
                   </div>
                 }
               />
@@ -148,7 +130,7 @@ export default function ReviewDetail() {
           </>
         )}
 
-        {(!detail.violations || detail.violations.length === 0) &&
+        {(!detail.results || detail.results.filter(r => r.verdict === 'violation').length === 0) &&
           (!detail.missingElements || detail.missingElements.length === 0) && (
             <Alert type="success" message="审查通过，未发现违规项或缺失要素" showIcon />
           )}
