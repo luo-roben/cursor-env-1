@@ -43,3 +43,16 @@ The app starts on port **8080**. Schema auto-initializes via `spring.sql.init` f
 
 ### API Exploration
 Swagger UI is available at `http://localhost:8080/swagger-ui.html` and OpenAPI spec at `/v3/api-docs`.
+
+### Frontend (compliance-review-web/)
+The `compliance-review-web/` directory contains a Vite + React 18 + TypeScript frontend using Ant Design 5.x.
+
+| Action | Command |
+|---|---|
+| Install deps | `npm install` (from `compliance-review-web/`) |
+| Dev server | `npm run dev` (port 3000, proxies `/api` → `localhost:8080`) |
+| Lint | `npm run lint` |
+| Build | `npm run build` |
+
+- The dev server proxies all `/api` requests to the Spring Boot backend at port 8080. Start the backend first.
+- The `react-hooks/set-state-in-effect` ESLint rule is disabled because data fetching in effects with setState is a standard React 18 pattern.
