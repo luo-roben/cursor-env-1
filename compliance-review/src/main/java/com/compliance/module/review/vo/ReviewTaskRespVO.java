@@ -16,6 +16,7 @@ public class ReviewTaskRespVO {
     private String channel;
     private String originalContent;
     private String fileUrl;
+    private String fileName;
     private String overallVerdict;
     private Integer riskScore;
     private String riskLevel;

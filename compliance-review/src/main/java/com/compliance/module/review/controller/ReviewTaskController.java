@@ -10,7 +10,9 @@ import io.swagger.v3.oas.annotations.Parameter;
 import io.swagger.v3.oas.annotations.tags.Tag;
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
+import org.springframework.http.MediaType;
 import org.springframework.web.bind.annotation.*;
+import org.springframework.web.multipart.MultipartFile;
 
 @Tag(name = "合规审查任务", description = "Compliance review task management")
 @RestController
@@ -24,6 +26,18 @@ public class ReviewTaskController {
     @PostMapping("/submit")
     public CommonResult<ReviewTaskRespVO> submit(@Valid @RequestBody ReviewSubmitReqVO reqVO) {
         return CommonResult.success(reviewTaskService.submit(reqVO));
+    }
+
+    @Operation(summary = "上传文件审查", description = "Upload a file (image/PDF/Word) for compliance review")
+    @PostMapping(value = "/upload", consumes = MediaType.MULTIPART_FORM_DATA_VALUE)
+    public CommonResult<ReviewTaskRespVO> uploadAndReview(
+            @RequestParam("file") MultipartFile file,
+            @RequestParam("contentType") String contentType,
+            @RequestParam(value = "productType", required = false) String productType,
+            @RequestParam(value = "channel", required = false) String channel,
+            @RequestParam(value = "tenantId", defaultValue = "1") Long tenantId,
+            @RequestParam(value = "submittedBy", defaultValue = "1") Long submittedBy) {
+        return CommonResult.success(reviewTaskService.uploadAndReview(file, contentType, productType, channel, tenantId, submittedBy));
     }
 
     @Operation(summary = "获取审查任务详情", description = "Get review task detail with results")

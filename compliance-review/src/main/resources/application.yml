@@ -2,6 +2,10 @@ server:
   port: 8080
 
 spring:
+  servlet:
+    multipart:
+      max-file-size: 50MB
+      max-request-size: 50MB
   datasource:
     url: jdbc:mysql://localhost:3306/compliance_review?useUnicode=true&characterEncoding=UTF-8&serverTimezone=Asia/Shanghai&allowPublicKeyRetrieval=true&useSSL=false
     username: compliance
@@ -32,6 +36,8 @@ springdoc:
     path: /swagger-ui.html
 
 compliance:
+  upload:
+    path: /workspace/compliance-review/uploads
   llm:
     default-model: mock
     temperature: 0.0
