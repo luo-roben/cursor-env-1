@@ -40,6 +40,8 @@ The app starts on port **8080**. Schema auto-initializes via `spring.sql.init` f
 - The `spring.sql.init.mode=always` means schema.sql runs on every startup; all DDL uses `CREATE TABLE IF NOT EXISTS` and `ON DUPLICATE KEY UPDATE` so it's safe for repeated runs.
 - JSON columns in entities are mapped as `String`; serialize/deserialize manually with Jackson `ObjectMapper`.
 - The AI module uses a `MockChatModel` that detects keywords like "保本", "收益率", "稳赚" to generate realistic violation results without an actual LLM.
+- The `/api/v1/review/upload` endpoint requires `tesseract-ocr` with Chinese language support for image OCR. Install via: `sudo apt-get install -y tesseract-ocr tesseract-ocr-chi-sim tesseract-ocr-chi-tra`. Without tesseract, image uploads still work but return a placeholder OCR text.
+- The MySQL socket directory `/var/run/mysqld/` may have restrictive permissions after service start; run `sudo chmod 755 /var/run/mysqld/` if you get socket connection errors from non-root users.
 
 ### API Exploration
 Swagger UI is available at `http://localhost:8080/swagger-ui.html` and OpenAPI spec at `/v3/api-docs`.
