@@ -9,6 +9,13 @@ export function getReviewById(id: number, tenantId: number = 1): Promise<ApiResp
   return request.get(`/review/${id}`, { params: { tenantId } });
 }
 
+export function uploadAndReview(formData: FormData): Promise<ApiResponse<ReviewTaskResp>> {
+  return request.post('/review/upload', formData, {
+    headers: { 'Content-Type': 'multipart/form-data' },
+    timeout: 60000,
+  });
+}
+
 export function getReviewList(params: {
   tenantId: number;
   pageNum: number;

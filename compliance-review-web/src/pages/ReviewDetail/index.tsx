@@ -38,6 +38,18 @@ export default function ReviewDetail() {
 
   return (
     <div>
+      {detail.fileUrl && (
+        <Card title="上传文件" style={{ marginBottom: 16 }}>
+          {detail.fileUrl.match(/\.(jpg|jpeg|png|gif|webp|bmp)$/i) ? (
+            <img src={`/api/v1/files/${detail.fileUrl}`} alt="上传文件" style={{ maxWidth: '100%', maxHeight: 400 }} />
+          ) : (
+            <a href={`/api/v1/files/${detail.fileUrl}`} target="_blank" rel="noopener noreferrer">
+              {detail.fileName || '下载查看文件'}
+            </a>
+          )}
+        </Card>
+      )}
+
       <Card title="审查摘要" style={{ marginBottom: 16 }}>
         <Descriptions column={4}>
           <Descriptions.Item label="审查结论">

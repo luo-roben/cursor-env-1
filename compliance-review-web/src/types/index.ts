@@ -55,6 +55,7 @@ export interface ReviewTaskResp {
   channel: string;
   originalContent: string;
   fileUrl: string | null;
+  fileName?: string;
   overallVerdict: string;
   riskScore: number;
   riskLevel: string;
